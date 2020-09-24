@@ -1,0 +1,13 @@
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+mqtt:
+  serverUrls: tcp://localhost:1883
+  username: admin
+  password: admin
+  clientId: openstack
+  timeout: 1000
+  keepalive: 20
+server:
+  port: 8333
