@@ -16,11 +16,13 @@ import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannel
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 @Configuration
+@Service
 public class ConsumerConfig {
     @Value("${mqtt.serverUrls}")
     private String serverUrl;
@@ -37,6 +39,8 @@ public class ConsumerConfig {
 
     @Autowired
     SaveToHdfs saveToHdfs;
+    @Autowired
+    WebSocket websocket;
 
     private MqttPahoMessageDrivenChannelAdapter adapter;
 
@@ -91,6 +95,7 @@ public class ConsumerConfig {
                     } catch (IOException | URISyntaxException e) {
                         e.printStackTrace();
                     }
+                    websocket.sendMessage(topic,content);
                     break;
                 }
             }
