@@ -1,6 +1,7 @@
 package cn.edu.bjtu.eboscloud.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +91,9 @@ public class ConsumerConfig {
     public MessageHandler handler() {
         return message -> {
             String content = message.getPayload().toString();
-            JSONObject js = JSON.parseObject(content);
+            JSONObject j = JSON.parseObject(content);
+            JSONArray ja = (JSONArray) j.get("readings");
+            JSONObject js = ja.getJSONObject(0);
             String name = (String) js.get("name");
             int value = (int) js.get("value");
             MultiValueMap<String, Integer> result = new LinkedMultiValueMap<>();
