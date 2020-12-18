@@ -1,7 +1,7 @@
 package cn.edu.bjtu.eboscloud.service;
 
-import cn.edu.bjtu.eboscloud.controller.RecieveDataController;
-import cn.edu.bjtu.eboscloud.entity.SubscribeList;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +17,9 @@ import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @Service
@@ -38,9 +38,12 @@ public class ConsumerConfig {
     private String clientId;
 
     @Autowired
-    SaveToHdfs saveToHdfs;
-    @Autowired
-    WebSocket websocket;
+    RestTemplate restTemplate;
+
+//    @Autowired
+//    SaveToHdfs saveToHdfs;
+//    @Autowired
+//    WebSocket websocket;
 
     private MqttPahoMessageDrivenChannelAdapter adapter;
 
@@ -87,24 +90,33 @@ public class ConsumerConfig {
     public MessageHandler handler() {
         return message -> {
             String content = message.getPayload().toString();
-            String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
-            for (SubscribeList subscribeList : RecieveDataController.getStatus()){
-                if (topic.equals(subscribeList.getTopic())){
-                    try {
-                        saveToHdfs.save(content,subscribeList.getAddresses(),subscribeList.getPath());
-                    } catch (IOException | URISyntaxException e) {
-                        e.printStackTrace();
-                    }
-                    websocket.sendMessage(topic,content);
-                    break;
-                }
-            }
+            JSONObject js = JSON.parseObject(content);
+            String name = (String) js.get("name");
+            int value = (int) js.get("value");
+            MultiValueMap<String, Integer> result = new LinkedMultiValueMap<>();
+            result.add(name,value);
+            String url = "http://localhost:8333/api/cloud/data";
             try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.out.println(content);
+                restTemplate.postForObject(url,result,String.class);
+            }catch (Exception ignored){}
+//            String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
+//            for (SubscribeList subscribeList : RecieveDataController.getStatus()){
+//                if (topic.equals(subscribeList.getTopic())){
+//                    try {
+//                        saveToHdfs.save(content,subscribeList.getAddresses(),subscribeList.getPath());
+//                    } catch (IOException | URISyntaxException e) {
+//                        e.printStackTrace();
+//                    }
+//                    websocket.sendMessage(topic,content);
+//                    break;
+//                }
+////            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println(content);
         };
     }
 
