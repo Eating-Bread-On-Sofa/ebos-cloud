@@ -11,15 +11,12 @@ public class RecieveDataController {
 
     @CrossOrigin
     @PostMapping("/data")
-    public String update(@RequestParam(value = "name") String name,@RequestParam(value = "value") int value){
-        if(name.equals("RandomValue_Int16")){
-            result.put("RandomValue_Int16",value);
-            return "收到";
-        }else if(name.equals("RandomValue_Int32")){
-            result.put("RandomValue_Int32",value);
+    public String update(@RequestParam(value = "name") String name,@RequestParam(value = "value") String value){
+        if(name.equals("Humidity")){
+            result.put("Humidity",Integer.parseInt(value));
             return "收到";
         }else {
-            result.put("RandomValue_Int8",value);
+            result.put("TemperatureDeg",Integer.parseInt(value));
             return "收到";
         }
     }

@@ -95,9 +95,12 @@ public class ConsumerConfig {
             JSONArray ja = (JSONArray) j.get("readings");
             JSONObject js = ja.getJSONObject(0);
             String name = (String) js.get("name");
-            int value = (int) js.get("value");
-            MultiValueMap<String, Integer> result = new LinkedMultiValueMap<>();
-            result.add(name,value);
+            System.out.println(name);
+            String value = (String) js.get("value");
+            System.out.println(value);
+            MultiValueMap<String,String> result = new LinkedMultiValueMap<String,String>();
+            result.add("name",name);
+            result.add("value",value);
             String url = "http://localhost:8333/api/cloud/data";
             try {
                 restTemplate.postForObject(url,result,String.class);
