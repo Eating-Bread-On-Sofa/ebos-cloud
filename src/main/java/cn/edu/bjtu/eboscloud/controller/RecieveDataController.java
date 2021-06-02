@@ -1,7 +1,17 @@
 package cn.edu.bjtu.eboscloud.controller;
 
+import cn.edu.bjtu.eboscloud.config.ActivemqConfig;
+import cn.edu.bjtu.eboscloud.service.RawSubscribe;
+import cn.edu.bjtu.eboscloud.service.SubscribeService;
 import com.alibaba.fastjson.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/cloud")
@@ -9,14 +19,25 @@ public class RecieveDataController {
 
     public static JSONObject result = new JSONObject();
 
+    @Autowired
+    SubscribeService subscribeService;
+
+    public static final List<RawSubscribe> status = new LinkedList<>();
+    private ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 50,3, TimeUnit.SECONDS,new SynchronousQueue<>());
+
     @CrossOrigin
     @PostMapping("/data")
     public String update(@RequestParam(value = "name") String name,@RequestParam(value = "value") String value){
-        if(name.equals("Humidity")){
-            result.put("Humidity",Integer.parseInt(value));
+        if(name.equals("RandomValue_Int16")){
+            result.put("RandomValue_Int16",Integer.parseInt(value));
+            return "收到";
+        }else if(name.equals("RandomValue_Int8")){
+            result.put("RandomValue_Int8",Integer.parseInt(value));
+            return "收到";
+        }else if(name.equals("RandomValue_Int32")){
+            result.put("RandomValue_Int32",Integer.parseInt(value));
             return "收到";
         }else {
-            result.put("TemperatureDeg",Integer.parseInt(value));
             return "收到";
         }
     }
@@ -27,63 +48,55 @@ public class RecieveDataController {
         return result;
     }
 
-//    private static final List<SubscribeList> status = new LinkedList<>();
-//
-//    public static List<SubscribeList> getStatus() {
-//        return status;
-//    }
-//
-//    @Autowired
-//    ConsumerConfig consumerConfig;
-//
-//    @CrossOrigin
-//    @GetMapping("/list")
-//    public List<SubscribeList> allInfo(){
-//        return status;
-//    }
-//
-//    @CrossOrigin
-//    @PostMapping("/subscribe")
-//    public JSONObject subscribe(@RequestBody SubscribeList subscribeList){
-//        if(!check(subscribeList.getTopic())){
-//            String result = consumerConfig.addListenTopic(subscribeList.getTopic());
-//            status.add(subscribeList);
-//            JSONObject json = new JSONObject();
-//            json.put("message",result);
-//            return json;
-//        }else{
-//            JSONObject jo = new JSONObject();
-//            jo.put("message","订阅主题重复");
-//            return jo;
-//        }
-//
-//    }
-//
-//    public static boolean check(String topic){
-//        boolean flag = false;
-//        for (SubscribeList subscribeList : status) {
-//            if(topic.equals(subscribeList.getTopic())){
-//                flag=true;
-//                break;
-//            }
-//        }
-//        return flag;
-//    }
-//
-//    @CrossOrigin
-//    @DeleteMapping("/subscribe/{topic}")
-//    public JSONObject delete(@PathVariable String topic){
-//        for (SubscribeList subscribeList : status){
-//            if (topic.equals(subscribeList.getTopic())){
-//                status.remove(subscribeList);
-//                break;
-//            }
-//        }
-//        String result = consumerConfig.removeListenTopic(topic);
-//        JSONObject json = new JSONObject();
-//        json.put("message",result);
-//        return json;
-//    }
+    @CrossOrigin
+    @PostMapping("/subscribe")
+    public String newSubscribe(String topic){
+        RawSubscribe rawSubscribe = new RawSubscribe(topic);
+        if(!check(rawSubscribe.getSubTopic())){
+            try{
+                status.add(rawSubscribe);
+                subscribeService.save(rawSubscribe.getSubTopic());
+                threadPoolExecutor.execute(rawSubscribe);
+                return "订阅成功";
+            }catch (Exception e) {
+                e.printStackTrace();
+                return "参数错误!";
+            }
+        }else {
+            return "订阅主题重复";
+        }
+    }
+
+    public static boolean check(String subTopic){
+        boolean flag = false;
+        for (RawSubscribe rawSubscribe : status) {
+            if(subTopic.equals(rawSubscribe.getSubTopic())){
+                flag=true;
+                break;
+            }
+        }
+        return flag;
+    }
+
+    @CrossOrigin
+    @DeleteMapping("/subscribe/{subTopic}")
+    public boolean delete(@PathVariable String subTopic){
+        boolean flag;
+        synchronized (status){
+            flag = status.remove(search(subTopic));
+        }
+        subscribeService.delete(subTopic);
+        return flag;
+    }
+
+    public static RawSubscribe search(String subTopic){
+        for (RawSubscribe rawSubscribe : status) {
+            if(subTopic.equals(rawSubscribe.getSubTopic())){
+                return rawSubscribe;
+            }
+        }
+        return null;
+    }
 
     @CrossOrigin
     @GetMapping("/ping")
