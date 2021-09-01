@@ -6,6 +6,7 @@ package cn.edu.bjtu.eboscloud.controller;
 import cn.edu.bjtu.eboscloud.entity.ExportData;
 import cn.edu.bjtu.eboscloud.service.ConsumerConfig;
 import cn.edu.bjtu.eboscloud.service.ExportService;
+import cn.edu.bjtu.eboscloud.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -100,10 +101,13 @@ public class RecieveDataController {
     ConsumerConfig consumerConfig;
     @Autowired
     ExportService exportService;
+    @Autowired
+    TopicService topicService;
 
     @CrossOrigin
     @PostMapping("/topic")
     public String addTopic(String topic){
+        topicService.write(topic);
         return consumerConfig.addListenTopic(topic);
     }
 
@@ -116,6 +120,7 @@ public class RecieveDataController {
     @CrossOrigin
     @DeleteMapping("/topic")
     public String delTopic(String topic){
+        topicService.del(topic);
         return consumerConfig.removeListenTopic(topic);
     }
 

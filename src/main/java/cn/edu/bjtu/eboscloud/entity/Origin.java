@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 @Document(collection = "origin")
 public class Origin implements Serializable {
+
     private String data;
 
     public String getData() {

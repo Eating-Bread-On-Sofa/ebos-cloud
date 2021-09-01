@@ -12,7 +12,7 @@ import java.util.Date;
  */
 @Document(collection = "exportData")
 public class ExportData implements Serializable {
-    @Id
+
     private String device;
     private String topic;
     private String key1;
