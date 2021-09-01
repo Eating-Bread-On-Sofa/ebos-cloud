@@ -15,8 +15,16 @@ mqtt:
   serverUrls: tcp://localhost:1883
   username: admin
   password: admin
-  clientId: openstack
+  clientId: cloud
   timeout: 1000
   keepalive: 20
 server:
-  port: 8888
+  port: 8333
+#export:
+#  name: cloud
+#  ip: 127.0.0.1
+#  port: 1883
+#  publisher: admin
+#  user: user
+#  password: user
+#  topic: edgex
