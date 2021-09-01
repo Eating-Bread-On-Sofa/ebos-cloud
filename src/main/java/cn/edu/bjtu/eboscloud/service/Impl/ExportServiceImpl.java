@@ -41,14 +41,19 @@ public class ExportServiceImpl implements ExportService {
     }
 
     @Override
+    public List<ExportData> findAll() {
+        return mongoTemplate.findAll(ExportData.class,"exportData");
+    }
+
+    @Override
     public ExportData findByDevice(String device) {
         Query query = Query.query(Criteria.where("device").is(device));
         return mongoTemplate.findOne(query,ExportData.class,"exportData");
     }
 
     @Override
-    public String del(String device) {
-        Query query = Query.query(Criteria.where("device").is(device));
+    public String del(String device,String topic) {
+        Query query = Query.query(Criteria.where("device").is(device).and("topic").is(topic));
         mongoTemplate.remove(query,ExportData.class,"exportData");
         return "删除成功！";
     }

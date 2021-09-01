@@ -131,9 +131,15 @@ public class RecieveDataController {
     }
 
     @CrossOrigin
+    @GetMapping("/allData")
+    public List<ExportData> showAll(){
+        return exportService.findAll();
+    }
+
+    @CrossOrigin
     @DeleteMapping("/data")
-    public String delData(String device){
-        return exportService.del(device);
+    public String delData(String device,String topic){
+        return exportService.del(device,topic);
     }
 
     @CrossOrigin

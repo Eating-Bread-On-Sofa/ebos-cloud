@@ -13,7 +13,8 @@ import java.util.List;
 public interface ExportService {
     void write(ExportData exportData);
     List<ExportData> findByTopic(String topic);
+    List<ExportData> findAll();
     ExportData findByDevice(String device);
-    String del(String device);
+    String del(String device,String topic);
     void update(ExportData exportData);
 }

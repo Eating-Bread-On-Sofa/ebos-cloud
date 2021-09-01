@@ -12,6 +12,7 @@ import java.io.Serializable;
 @Document(collection = "topic")
 public class Topic implements Serializable {
 
+    @Id
     private String topic;
 
     public String getTopic() {
