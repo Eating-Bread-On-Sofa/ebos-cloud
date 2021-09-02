@@ -107,6 +107,12 @@ public class RecieveDataController {
     @CrossOrigin
     @PostMapping("/topic")
     public String addTopic(String topic){
+        String[] topics = consumerConfig.getTopic();
+        for (String t : topics){
+            if (t.equals(topic)){
+                return "该主题已订阅！";
+            }
+        }
         topicService.write(topic);
         return consumerConfig.addListenTopic(topic);
     }
@@ -120,8 +126,14 @@ public class RecieveDataController {
     @CrossOrigin
     @DeleteMapping("/topic")
     public String delTopic(String topic){
-        topicService.del(topic);
-        return consumerConfig.removeListenTopic(topic);
+        String[] topics = consumerConfig.getTopic();
+        for (String t : topics){
+            if (t.equals(topic)){
+                topicService.del(topic);
+                return consumerConfig.removeListenTopic(topic);
+            }
+        }
+        return "无法删除未订阅主题！";
     }
 
     @CrossOrigin

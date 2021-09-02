@@ -63,7 +63,7 @@ public class ExportServiceImpl implements ExportService {
         Query query = new Query(Criteria.where("device").is(exportData.getDevice()).and("topic").is(exportData.getTopic()));
         Update update = new Update();
         update.set("time",new Date());
-        if(exportData.getKey1()==null){
+        if(exportData.getKey1()!=null){
             update.set("key1",exportData.getKey1());
             update.set("value1",exportData.getValue1());
         }else {
