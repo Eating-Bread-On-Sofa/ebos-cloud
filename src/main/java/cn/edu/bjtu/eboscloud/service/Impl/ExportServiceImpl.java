@@ -46,8 +46,8 @@ public class ExportServiceImpl implements ExportService {
     }
 
     @Override
-    public ExportData findByDevice(String device) {
-        Query query = Query.query(Criteria.where("device").is(device));
+    public ExportData findByDevice(String device,String topic) {
+        Query query = Query.query(Criteria.where("device").is(device).and("topic").is(topic));
         return mongoTemplate.findOne(query,ExportData.class,"exportData");
     }
 
@@ -60,7 +60,7 @@ public class ExportServiceImpl implements ExportService {
 
     @Override
     public void update(ExportData exportData) {
-        Query query = new Query(Criteria.where("device").is(exportData.getDevice()));
+        Query query = new Query(Criteria.where("device").is(exportData.getDevice()).and("topic").is(exportData.getTopic()));
         Update update = new Update();
         update.set("time",new Date());
         if(exportData.getKey1()==null){

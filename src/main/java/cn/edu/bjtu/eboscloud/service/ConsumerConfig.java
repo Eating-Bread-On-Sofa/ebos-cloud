@@ -92,6 +92,7 @@ public class ConsumerConfig {
         return message -> {
             String content = message.getPayload().toString();
             originService.write(content);
+            String topic = Objects.requireNonNull(message.getHeaders().get("mqtt_receivedTopic")).toString();
             try{
                 JSONObject j = JSON.parseObject(content);
                 JSONArray ja = (JSONArray) j.get("readings");
@@ -115,17 +116,21 @@ public class ConsumerConfig {
                         System.out.println("未知");
                 }
                 String value = (String) js.get("value");
-                ExportData es = exportService.findByDevice(device);
+                ExportData es = exportService.findByDevice(device,topic);
                 if (device.equals("Random-Integer-Generator01")){
                     System.out.println(device);
                 }else if(es != null){
                     if (es.getKey1().equals(key)){
                         ExportData exportData = new ExportData();
+                        exportData.setDevice(device);
+                        exportData.setTopic(topic);
                         exportData.setKey1(key);
                         exportData.setValue1(value);
                         exportService.update(exportData);
                     }else {
                         ExportData exportData = new ExportData();
+                        exportData.setDevice(device);
+                        exportData.setTopic(topic);
                         exportData.setKey2(key);
                         exportData.setValue2(value);
                         exportService.update(exportData);
@@ -133,7 +138,7 @@ public class ConsumerConfig {
                 }else {
                     ExportData exportData = new ExportData();
                     exportData.setDevice(device);
-                    exportData.setTopic(Objects.requireNonNull(message.getHeaders().get("mqtt_receivedTopic")).toString());
+                    exportData.setTopic(topic);
                     exportData.setKey1(key);
                     exportData.setValue1(value);
                     exportService.write(exportData);
